@@ -182,7 +182,7 @@ For developers inspecting raw game storage files or building custom dashboards, 
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/<your-username>/active-matter-parser.git
+git clone https://github.com/Bathert/active-matter-parser.git
 cd active-matter-parser
 pip install -e .
 ```
