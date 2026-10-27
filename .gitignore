@@ -43,6 +43,9 @@ env/
 *~
 
 # AI assistants & AI tooling artifacts
+.codex/
+codex/
+.codexrc
 .gemini/
 .claude/
 .cursor/
@@ -50,6 +53,8 @@ env/
 .windsurf/
 .cline/
 .copilot/
+.aider*
+.continue/
 .system_generated/
 *.bundle.md
 *-bundle.md
