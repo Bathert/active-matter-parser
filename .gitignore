@@ -1,0 +1,90 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# AI assistants & AI tooling artifacts
+.gemini/
+.claude/
+.cursor/
+.cursorrules
+.windsurf/
+.cline/
+.copilot/
+.system_generated/
+*.bundle.md
+*-bundle.md
+*.ai-bundle.md
+chat/
+prompts/
+scratch/
+
+# Testing & Type checking caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Local databases, dumps and logs
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+*.dump
+*.zip
+*.tar.gz
+
+# Game storage & test outputs
+raids_v2/
+demo_sliced_raids/
+sliced_raids/
+test_out/
+global.json
+lastUid
+online_storage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini

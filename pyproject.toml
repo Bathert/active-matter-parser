@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "activematter-parser"
+version = "2.0.0"
+description = "Pure Python parser for Active Matter local storage: operative profiles, equipped loadout, and JSON 2.0 raid telemetry slicer."
+readme = "README.md"
+authors = [{ name = "Active Matter Community" }]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+keywords = [
+    "active-matter",
+    "parser",
+    "telemetry",
+    "raids",
+    "slicer",
+    "gaijin",
+    "dagor"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Games/Entertainment",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = []
+
+[project.scripts]
+activematter-parser = "activematter_parser.cli:main"
+
+[tool.setuptools]
+packages = ["activematter_parser"]
