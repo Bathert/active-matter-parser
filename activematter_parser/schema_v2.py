@@ -57,6 +57,8 @@ self-describing JSON Schema 2.0 format.
     - ammoCount: Количество патронов, заряженных в магазин.
 ================================================================================
 """
+import base64
+import json
 import math
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -129,6 +131,16 @@ ITEM_PRETTY_NAMES: Dict[str, str] = {
     "armorplate_small_uhmwpe": "Малая бронеплита UHMWPE",
     "dash_speed_mult_chronogene_t3": "Хроноген: Скорость рывка III",
     "dash_speed_mult_chronogene_t2": "Хроноген: Скорость рывка II",
+    "dash_stamina_drain_chronogene_t3": "Хроноген: Выносливость рывка III",
+    "weight_penalty_reduction_chronogene_t2": "Хроноген: Легкость ноши II",
+    "item_usage_speed_chronogene_t2": "Хроноген: Скорость применения II",
+    "heal_improvement_chronogene_t2": "Хроноген: Эффективность лечения II",
+    "item_junk_chemicals_vaseline": "Химсырье: Медицинский вазелин",
+    "item_junk_electronics_diode_a": "Электроника: Диод типа А",
+    "item_junk_electronics_diode_c": "Электроника: Диод типа C",
+    "item_junk_modern_business_card_g": "Документы: Визитная карточка",
+    "item_vhs_cassete_h": "Видеокассета VHS (Запись H)",
+    "item_vhs_cassete_k": "Видеокассета VHS (Запись K)",
 }
 
 KNOWN_ITEM_NAMES_RU = ITEM_PRETTY_NAMES
@@ -187,6 +199,7 @@ REGION_NAMES: Dict[str, str] = {
 }
 
 SUBLOCATION_NAMES: Dict[str, str] = {
+    # Дальний остров
     "shegolskoe": "Щегольское",
     "ozernoe": "Озёрное",
     "factory": "Завод",
@@ -199,17 +212,44 @@ SUBLOCATION_NAMES: Dict[str, str] = {
     "scrapyard": "Свалка",
     "dogorsk": "Догорск",
     "underground": "Подземка",
+    "epicenter": "Эпицентр",
+    "euclid": "Евклид",
+    "island": "Дальний остров",
+    # Африка
     "airport": "Аэропорт",
     "headquarters": "Штаб-квартира",
+    "town": "Город",
+    "mothmen": "Логово Мофменов",
+    # Америка
     "abandoned_city": "Заброшенный город",
     "abandoned_breakout": "Зона прорыва",
     "abandoned_collapse": "Коллапс",
+    "abandoned_icarus": "Комплекс «Икарус»",
+    "abandoned_xenos": "Гнездо Ксеносов",
+    "breakout": "Зона прорыва",
+    "collapse": "Коллапс",
+    "icarus": "Комплекс «Икарус»",
+    # Nexus CQB
     "factory_mir": "Завод МИР",
+    "mir": "Завод МИР",
     "itzal_kutan": "Ицаль-Кутан",
     "underground_depo": "Подземное депо",
     "vanilla_mall": "Торговый центр",
+    # Особые локации
     "gigastructure": "Гигахрущ",
+    "gigastructure_samosbor": "Гигахрущ (Самосбор)",
     "samosbor": "Самосбор",
+    "am_monolyth_island": "Монолитный остров",
+    "monolyth_island": "Монолитный остров",
+    "monolyth": "Монолитный остров",
+    # Общие ключевые секторы
+    "hospital": "Госпиталь",
+    "institute": "Институт",
+    "lighthouse": "Маяк",
+    "port": "Порт",
+    "bunker": "Бункер",
+    "power_plant": "Электростанция",
+    "radar": "Радарная станция",
 }
 
 MODE_NAMES: Dict[str, str] = {
@@ -354,7 +394,7 @@ def transform_to_schema_v2(
             p_uid_str = str(player_uid).strip()
             for p in team_info:
                 if isinstance(p, dict):
-                    cand = str(p.get("userId") or p.get("uid") or p.get("playerId") or "").strip()
+                    cand = str(p.get("userId") or p.get("uid") or p.get("playerId") or p.get("id") or "").strip()
                     if cand and cand == p_uid_str:
                         player_entry = p
                         break
@@ -524,19 +564,51 @@ def transform_to_schema_v2(
             brought_in_gear_items.append(item_entry)
 
     # 9. Прогресс контрактов и опыт
+    raw_cv = raw_raid.get("contractsVisuals")
+    raw_contracts_list: List[Dict[str, Any]] = []
+    if isinstance(raw_cv, str) and raw_cv.strip():
+        try:
+            decoded_cv = json.loads(base64.b64decode(raw_cv).decode("utf-8"))
+            if isinstance(decoded_cv, list):
+                raw_contracts_list = decoded_cv
+        except Exception:
+            pass
+    elif isinstance(raw_cv, list):
+        raw_contracts_list = raw_cv
+
     contracts = []
-    for c in raw_raid.get("contractsVisuals", []) or []:
+    for c in raw_contracts_list:
         if isinstance(c, dict):
+            pos = c.get("position") or {}
             contracts.append({
-                "id": c.get("id"),
+                "id": str(c.get("objectiveId") or c.get("id") or ""),
+                "name": str(c.get("objectiveName") or c.get("name") or "Контракт"),
                 "progress": safe_int(c.get("progress")),
                 "target": safe_int(c.get("target")),
                 "is_completed": bool(c.get("isCompleted", False)),
+                "is_secret": bool(c.get("isSecretObjective", False)),
+                "radius": safe_float(c.get("radius")),
+                "pos_x": safe_float(pos.get("x")),
+                "pos_y": safe_float(pos.get("y")),
+                "pos_z": safe_float(pos.get("z")),
             })
 
     exp_block = raw_raid.get("experienceBlock", {}) or {}
-    exp_rewards = exp_block.get("expRewards", []) or []
-    total_xp = sum(safe_int(r.get("exp")) for r in exp_rewards if isinstance(r, dict))
+    exp_before = safe_int(exp_block.get("expBeforeRewarding", 0))
+    exp_rewards = exp_block.get("expRewards", {}) or {}
+    if isinstance(exp_rewards, dict):
+        total_xp = sum(safe_int(v) for v in exp_rewards.values())
+    elif isinstance(exp_rewards, list):
+        total_xp = sum(safe_int(r.get("exp") if isinstance(r, dict) else r) for r in exp_rewards)
+    else:
+        total_xp = 0
+
+    # Серверный учет убийств ботов (dailyStatRewards)
+    daily_stats = raw_raid.get("dailyStatRewards", {}) or {}
+    if isinstance(daily_stats, dict):
+        daily_pve = sum(safe_int(v) for k, v in daily_stats.items() if str(k).startswith("kills_monster") or str(k).startswith("kills_creature"))
+        pve_kills_count = max(pve_kills_count, daily_pve)
+    kills_total_count = max(len(kills_list), pvp_kills_count + pve_kills_count)
 
     # 10. Открытые крафты и заряды хроногенов
     opened_recipes = [
@@ -573,7 +645,7 @@ def transform_to_schema_v2(
             "damage_received": damage_received,
             "pvp_damage": pvp_damage,
             "pve_damage": pve_damage,
-            "kills_total": len(kills_list),
+            "kills_total": kills_total_count,
             "pvp_kills": pvp_kills_count,
             "pve_kills": pve_kills_count,
             "kills": kills_list,
@@ -599,6 +671,7 @@ def transform_to_schema_v2(
         "contracts": contracts,
         "experience": {
             "total_xp": total_xp,
+            "exp_before": exp_before,
             "rewards": exp_rewards,
         },
         "opened_recipes": opened_recipes,

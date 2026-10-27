@@ -239,6 +239,57 @@ class TestSlicer(unittest.TestCase):
         self.assertEqual(item["ammo_count"], 0)
         self.assertEqual(item["charges"], 0)
 
+    def test_schema_v2_base64_contracts(self):
+        import base64
+        contracts_obj = [
+            {"objectiveId": "kill_boss", "objectiveName": "Ликвидировать аномалию", "radius": 50.0, "isSecretObjective": False},
+            {"objectiveId": "extract_sample", "objectiveName": "Собрать образцы", "radius": 20.0, "isSecretObjective": True}
+        ]
+        b64_str = base64.b64encode(json.dumps(contracts_obj).encode("utf-8")).decode("utf-8")
+        raid = {
+            "id": "contract-test",
+            "contractsVisuals": b64_str
+        }
+        v2 = transform_to_schema_v2(raid)
+        self.assertEqual(len(v2["contracts"]), 2)
+        self.assertEqual(v2["contracts"][0]["id"], "kill_boss")
+        self.assertEqual(v2["contracts"][0]["name"], "Ликвидировать аномалию")
+        self.assertFalse(v2["contracts"][0]["is_secret"])
+        self.assertTrue(v2["contracts"][1]["is_secret"])
+
+    def test_schema_v2_dict_exp_rewards(self):
+        raid = {
+            "id": "exp-dict-test",
+            "experienceBlock": {
+                "expBeforeRewarding": 100,
+                "expRewards": {
+                    "lootedCommonContainers": 20,
+                    "lootedBodies": 10,
+                    "playTime": 38
+                }
+            }
+        }
+        v2 = transform_to_schema_v2(raid)
+        self.assertEqual(v2["experience"]["total_xp"], 68)
+        self.assertEqual(v2["experience"]["exp_before"], 100)
+
+    def test_schema_v2_daily_stat_monster_kills(self):
+        raid = {
+            "id": "daily-stat-pve-test",
+            "dailyStatRewards": {
+                "kills_monster_invisible": 10,
+                "kills_monster_hound": 5,
+                "unrelated_stat": 99
+            },
+            "trackPoints": [
+                {"eventType": "kill", "victimType": "monster_invisible", "timestamp": 10.0}
+            ]
+        }
+        v2 = transform_to_schema_v2(raid)
+        # Authoritative PvE kills should sum 10 + 5 = 15 even though trackPoints only has 1 sampled kill
+        self.assertEqual(v2["combat"]["pve_kills"], 15)
+        self.assertEqual(v2["combat"]["kills_total"], 15)
+
 
 if __name__ == "__main__":
     unittest.main()

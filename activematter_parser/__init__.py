@@ -25,6 +25,9 @@ from .parser import (
 )
 
 from .schema_v2 import (
+    KNOWN_ITEM_NAMES_RU,
+    ITEM_PRETTY_NAMES,
+    ITEM_CATEGORIES,
     transform_to_schema_v2,
     prettify_item_name,
     categorize_template,
@@ -49,6 +52,15 @@ __all__ = [
     "get_raid_history",
     "get_player_career_summary",
     "format_epoch_dt",
+    "KNOWN_ITEM_NAMES_RU",
+    "ITEM_PRETTY_NAMES",
+    "ITEM_CATEGORIES",
+    "KNOWN_ITEM_NAMES_RU",
+
+    "ITEM_PRETTY_NAMES",
+
+    "ITEM_CATEGORIES",
+
     "transform_to_schema_v2",
     "prettify_item_name",
     "categorize_template",

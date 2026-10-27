@@ -214,6 +214,14 @@ class TestParser(unittest.TestCase):
         }
         self.assertEqual(resolve_effective_uid(data), "987654321")
 
+        # 2b. From teamInfo with 'id' key (Active Matter / Dagor convention)
+        data_dagor = {
+            "battleResults": [
+                {"teamInfo": [{"id": "240872112", "name": "Battrip"}]}
+            ]
+        }
+        self.assertEqual(resolve_effective_uid(data_dagor), "240872112")
+
         # 3. Path with 4-digit backup year folder (e.g. 2026) must NOT be mistaken for player UID
         year_path = "C:/Backups/2026/custom_folder/global.json"
         self.assertEqual(resolve_effective_uid(year_path, content=data), "987654321")

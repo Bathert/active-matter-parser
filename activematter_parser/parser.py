@@ -128,7 +128,7 @@ def resolve_effective_uid(
             if isinstance(r, dict):
                 for p in r.get("teamInfo", []):
                     if isinstance(p, dict) and (p.get("isLocal") or p.get("isMe")):
-                        cand = p.get("userId") or p.get("uid") or p.get("playerId")
+                        cand = p.get("userId") or p.get("uid") or p.get("playerId") or p.get("id")
                         if cand and str(cand).isdigit():
                             return str(cand)
 
@@ -137,7 +137,7 @@ def resolve_effective_uid(
             if isinstance(r, dict):
                 for p in r.get("teamInfo", []):
                     if isinstance(p, dict):
-                        cand = p.get("userId") or p.get("uid") or p.get("playerId")
+                        cand = p.get("userId") or p.get("uid") or p.get("playerId") or p.get("id")
                         if cand and str(cand).isdigit():
                             return str(cand)
 
@@ -261,7 +261,7 @@ def get_player_profile(source: Optional[Union[str, Path, Dict[str, Any]]] = None
                 # Search for player matching eff_uid or local marker
                 for p in teams:
                     if isinstance(p, dict):
-                        cand_id = str(p.get("userId") or p.get("uid") or p.get("playerId") or "").strip()
+                        cand_id = str(p.get("userId") or p.get("uid") or p.get("playerId") or p.get("id") or "").strip()
                         if cand_id and cand_id == eff_uid:
                             player_entry = p
                             break
